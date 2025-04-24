@@ -1,0 +1,42 @@
+<!-- templates/layout.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Notas{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Sistema de Notas</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('notes.cargar_nota') }}">Cargar Nota</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.notas_estado', estado='pendiente') }}">Notas Pendientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.notas_estado', estado='resuelto') }}">Notas Resueltas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.admin_dashboard') }}">Administrar Usuarios</a></li>
+                </ul>
+                <span class="navbar-text me-3">Bienvenido, {{ session.get('nombre', '') }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container-fluid mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Scripts -->
+    {% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% endblock %}
+</body>
+</html>

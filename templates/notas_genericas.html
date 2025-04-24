@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Notas Pendientes
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-2">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Card General -->
+    <div class="card shadow mb-5">
+        <!-- Cabecera -->
+        <div class="card-header bg-dark text-white">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h5 class="mb-0">Notas Pendientes</h5>
+                <a href="{{ url_for('notes.cargar_nota') }}" class="btn btn-success mt-2 mt-md-0">
+                    <i class="bi bi-file-earmark-plus"></i> Registrar Nueva Nota
+                </a>
+            </div>
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="card-body">
+            <!-- Formulario de Filtros -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">Programa</label>
+                    <select class="form-select" name="programa">
+                        <option value="">Todos</option>
+                        {% for prog in programas %}
+                            <option value="{{ prog }}" {% if request.args.get('programa') == prog %}selected{% endif %}>{{ prog }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Oficina</label>
+                    <select class="form-select" name="oficina">
+                        <option value="">Todas</option>
+                        {% for oficina in oficinas %}
+                            <option value="{{ oficina }}" {% if request.args.get('oficina') == oficina %}selected{% endif %}>{{ oficina }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" class="form-control" name="fecha" value="{{ request.args.get('fecha', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ingresado por</label>
+                    <select class="form-select" name="usuario">
+                        <option value="">Todos</option>
+                        {% for usuario in usuarios %}
+                            <option value="{{ usuario }}" {% if request.args.get('usuario') == usuario %}selected{% endif %}>{{ usuario }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="{{ url_for('main.notas_estado', estado=estado) }}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </form>
+
+            <!-- Tabla de Resultados -->
+            {% if notas %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Programa</th>
+                                <th>Oficina</th>
+                                <th>Número Oficina</th>
+                                <th>Detalle</th>
+                                <th>Fecha</th>
+                                <th>Ingresado por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nota in notas %}
+                            <tr>
+                                <td>{{ nota.id }}</td>
+                                <td>{{ nota.nombre_programa }}</td>
+                                <td>{{ nota.nombre_oficina }}</td>
+                                <td>{{ nota.numero_oficina }}</td>
+                                <td>{{ nota.detalle }}</td>
+                                <td>{{ nota.fechaIngreso }}</td>
+                                <td>{{ nota.nombre_usuario }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No hay notas pendientes.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

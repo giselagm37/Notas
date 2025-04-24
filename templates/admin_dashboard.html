@@ -1,0 +1,186 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Panel de Administración - Sistema de Notas
+{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-4">
+
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Sección de Gestión de Usuarios -->
+        <div class="card mb-5">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Gestión de Usuarios</h5>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-success">
+                    <i class="bi bi-person-plus"></i> Registrar Nuevo Usuario
+                </a>
+               
+                  
+            </div>
+            
+            
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Legajo</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario in usuarios %}
+                            <tr>
+                                <td>{{ usuario[0] }}</td>
+                                <td>{{ usuario[1] }}</td>
+                                <td>{{ usuario[2] }}</td>
+                                <td>{{ usuario[3] }}</td>
+                                <td>
+                                    {% if usuario[4] == 'admin' %}
+                                    <span class="badge bg-danger">Administrador</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">Usuario</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if usuario[0] != session.get('usuario_id') %}
+                                    <a href="{{ url_for('main.delete_user', id=usuario[0]) }}" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                    <a href="{{ url_for('main.editar_usuario', id=usuario[0]) }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                    
+
+                                    {% else %}
+                                    <button class="btn btn-sm btn-secondary" disabled>
+                                        <i class="bi bi-person-check"></i> Usuario Actual
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <form method="get" action="{{ url_for('main.admin_dashboard') }}" class="mb-4 p-3 border rounded bg-light">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">-- Todos --</option>
+                        <option value="pendiente" {% if request.args.get('estado')=='pendiente' %}selected{% endif %}>
+                            Pendiente</option>
+                        <option value="resuelto" {% if request.args.get('estado')=='resuelto' %}selected{% endif %}>
+                            Resuelto</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="fecha" class="form-label">Fecha</label>
+                    <input type="date" name="fecha" id="fecha" class="form-control"
+                        value="{{ request.args.get('fecha', '') }}">
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 me-2">Filtrar</button>
+                    <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary w-100">Ver Todo</a>
+                </div>
+                
+            </div>
+        </form>
+
+
+
+
+        <!-- Sección de Notas Cargadas -->
+        <div class="card mb-5">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Gestión de Notas</h5>
+                <a href="{{ url_for('notes.cargar_nota') }}" class="btn btn-success">
+                    <i class="bi bi-person-plus"></i> Registrar Nueva Nota
+                </a>
+                <a href="{{ url_for('main.exportar_notas_excel') }}" class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+                </a>
+            </div>
+
+         
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Programa</th>
+                                <th>Oficina</th>
+                                <th>Detalle</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nota in notas %}
+                            <tr>
+                                <td>{{ nota.nombre_usuario }}</td>
+                                <td>{{ nota.nombre_programa }}</td>
+                                <td>{{ nota.nombre_oficina }}</td>
+                                <td>{{ nota.detalle }}</td>
+                                <td>{{ nota.fechaIngreso }}</td>
+                                <td>
+                                    {% if session['rol'] == 'admin' %}
+                                    <form method="POST" action="{{ url_for('notes.eliminar_nota', id=nota.id) }}" onsubmit="return confirm('¿Estás seguro de que querés eliminar esta nota?');" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </button>
+                                    
+                                    {% endif %}
+
+                                        <a href="{{ url_for('notes.editar_nota', nota_id=nota.id) }}" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+    <script>
+        // Script para cerrar alertas automáticamente después de 5 segundos
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function (alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+{% endblock %}

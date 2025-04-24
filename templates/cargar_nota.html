@@ -1,0 +1,237 @@
+{# templates/cargar_nota.html #}
+{% extends "layout.html" %}
+
+{% block title %}Cargar Nota{% endblock %}
+
+{% block content %}
+
+        <div class="row">
+            <!-- Formulario de carga de notas -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">{{ titulo_formulario }}</h5>
+                    </div>
+                    <div class="card-body">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <form action="{{ url_for('notes.cargar_nota') }}" method="POST">
+                            <!-- Añadir esto dentro del formulario, justo antes de los campos de notas -->
+                            {% if es_admin %}
+                            <div class="form-group">
+                                <label for="usuario_seleccionado">Usuario:</label>
+                                <select class="form-control" id="usuario_seleccionado" name="usuario_seleccionado" required>
+                                    <option value="">Seleccionar usuario</option>
+                                    {% for usuario in usuarios %}
+                                    <option value="{{ usuario[0] }}">{{ usuario[1] }} {{ usuario[2] }} (ID: {{ usuario[0] }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            {% if nota_id %}
+                                <input type="hidden" name="nota_id" value="{{ nota_id }}">
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="anio" class="form-label">Año</label>
+                                <input type="number" class="form-control" id="anio" name="anio" value="{{ nota.anio if nota else '' }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="estado" class="form-label">Estado</label>
+                                <select class="form-select" id="estado" name="estado" required>
+                                    <option value="pendiente" {% if nota and nota.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                                    <option value="resuelto" {% if nota and nota.estado == 'resuelto' %}selected{% endif %}>Resuelto</option>
+                                    <option value="rechazado" {% if nota and nota.estado == 'rechazado' %}selected{% endif %}>Rechazado</option>
+                                </select>
+                            </div>
+
+                            <!-- Programa -->
+                            <div class="mb-3">
+                                <label for="id_programa" class="form-label">Programa</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="id_programa" name="id_programa" required>
+                                        <option value="" selected disabled>Seleccione un programa</option>
+                                        {% for programa in programas %}
+                                        <option value="{{ programa[0] }}" {% if nota and nota.id_programa == programa[0] %}selected{% endif %}>{{ programa[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    
+                                    {% if es_admin %}
+                                        <input type="text" class="form-control" id="nuevo_programa" name="nuevo_programa" placeholder="Nuevo programa">
+                                        <button type="button" class="btn btn-success" onclick="agregarPrograma()">+</button>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                            <!-- Oficina -->
+                            <div class="mb-3">
+                                <label for="id_oficina" class="form-label">Oficina</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="id_oficina" name="id_oficina" required>
+                                        <option value="" selected disabled>Seleccione una oficina</option>
+                                        {% for oficina in oficinas %}
+                                        <option value="{{ oficina[0] }}" {% if nota and nota.id_oficina == oficina[0] %}selected{% endif %}>{{ oficina[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if es_admin %}
+                                        <input type="text" class="form-control" id="nueva_oficina" name="nueva_oficina" placeholder="Nueva oficina">
+                                        <button type="button" class="btn btn-success" onclick="agregarOficina()">+</button>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="numero_oficina" class="form-label">Número de Oficina</label>
+                                <input type="text" class="form-control" id="numero_oficina" name="numero_oficina" value="{{ nota.numero_oficina if nota else '' }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="detalle" class="form-label">Detalle</label>
+                                <textarea class="form-control" id="detalle" name="detalle" rows="3" required>{{ nota.detalle if nota else '' }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fechaIngreso" class="form-label">Fecha de Ingreso</label>
+                                <input type="date" class="form-control" id="fechaIngreso" name="fechaIngreso" value="{{ nota.fechaIngreso if nota else '' }}" required>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                {% if nota_id %}
+                                    <a href="{{ url_for('notes.cargar_nota') }}" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-warning">Actualizar Nota</button>
+                                {% else %}
+                                    <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                                    <button type="submit" class="btn btn-primary">Cargar Nota</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla de notas -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Notas Cargadas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        
+                                        <th>Año</th>
+                                        <th>Estado</th>
+                                        <th>Programa</th>
+                                        <th>Oficina</th>
+                                        <th>Número Oficina</th>
+                                        <th>Detalle</th>
+                                        <th>Fecha de Ingreso</th>
+                                        <th>Cargado por</th>
+                                        <th>Acciones</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for nota in notas %}
+                                    <tr>
+                                        
+                                        <td>{{ nota.anio }}</td>
+                                        <td>
+                                            {% if nota.estado == 'pendiente' %}
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            {% elif nota.estado == 'resuelto' %}
+                                                <span class="badge bg-success">Aprobado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ nota.nombre_programa }}</td>
+                                        <td>{{ nota.nombre_oficina }}</td>
+                                        <td>{{ nota.numero_oficina }}</td>
+                                        <td>{{ nota.detalle }}</td>
+                                        <td>{{ nota.fechaIngreso }}</td>
+                                        <td>{{ nota.nombre_usuario }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('notes.editar_nota', nota_id=nota.id) }}" class="btn btn-sm btn-warning">
+
+                                                    <i class="bi bi-pencil-square"></i> Editar
+                                                </a>
+                                                {% if session['usuario'] == 'admin' %}
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ nota.id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            
+                                                <!-- Modal solo para admin -->
+                                                <div class="modal fade" id="deleteModal{{ nota.id }}" ...>
+                                                    
+                                                    <a href="{{ url_for('notes.eliminar_nota', nota_id=nota.id) }}" class="btn btn-danger">Eliminar</a>
+                                                    
+                                                </div>
+                                                {% endif %}
+                                               
+                                            </div>
+                                            
+                                            
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}    
+    <script>
+        function agregarPrograma() {
+            let nuevoPrograma = document.getElementById("nuevo_programa").value.trim();
+            
+            if (nuevoPrograma !== "") {
+                // Convertir el formulario a modo de inserción de programa
+                let form = document.querySelector("form");
+                let hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "accion";
+                hiddenInput.value = "nuevo_programa";
+                form.appendChild(hiddenInput);
+                
+                // Enviar el formulario
+                form.submit();
+            } else {
+                alert("Ingrese un nombre válido para el programa.");
+            }
+        }
+
+        function agregarOficina() {
+            let nuevaOficina = document.getElementById("nueva_oficina").value.trim();
+            
+            if (nuevaOficina !== "") {
+                // Convertir el formulario a modo de inserción de oficina
+                let form = document.querySelector("form");
+                let hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "accion";
+                hiddenInput.value = "nueva_oficina";
+                form.appendChild(hiddenInput);
+                
+                // Enviar el formulario
+                form.submit();
+            } else {
+                alert("Ingrese un nombre válido para la oficina.");
+            }
+        }
+    </script>
+{% endblock %}

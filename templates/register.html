@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Registrar Usuario - Sistema de Notas
+{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Registrar Nuevo Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <form action="{{ url_for('auth.register') }}" method="POST">
+                            <div class="mb-3">
+                                <label for="legajo" class="form-label">Legajo</label>
+                                <input type="number" class="form-control" id="legajo" name="legajo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Rol</label>
+                                <input type="text" class="form-control" value="Usuario" disabled>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

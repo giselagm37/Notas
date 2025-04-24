@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Editar Usuario - Sistema de Notas
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Editar Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="{{ url_for('main.editar_usuario', id=usuario[0]) }}">
+
+                            <div class="mb-3">
+                                <label for="legajo" class="form-label">Legajo</label>
+                                <input type="text" class="form-control" id="legajo" name="legajo" value="{{ usuario[1] }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario[2] }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" value="{{ usuario[3] }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="rol_id" class="form-label">Rol</label>
+                                <select class="form-select" id="rol_id" name="rol_id" required>
+                                    {% for rol in roles %}
+                                        <option value="{{ rol[0] }}" {% if rol[0] == usuario[5] %}selected{% endif %}>
+                                            {{ rol[1] }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contraseña" class="form-label">Nueva Contraseña (opcional)</label>
+                                <input type="password" class="form-control" id="contraseña" name="contraseña" placeholder="********">
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
