@@ -58,8 +58,7 @@ def login():
             print(session)
             return redirect(url_for("main.admin_dashboard"))
 
-        else:
-            flash("Credenciales incorrectas.", "danger")
+        
 
         # Abrir cursor para hacer la consulta
         cursor = mysql.connection.cursor()
