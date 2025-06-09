@@ -50,12 +50,14 @@
                                 <td>{{ usuario[2] }}</td>
                                 <td>{{ usuario[3] }}</td>
                                 <td>
-                                    {% if usuario[4] == 'admin' %}
+                                    {% if usuario[4] == 'Administrador' %}
                                     <span class="badge bg-danger">Administrador</span>
                                     {% else %}
                                     <span class="badge bg-primary">Usuario</span>
                                     {% endif %}
                                 </td>
+                                
+                                
                                 <td>
                                     {% if usuario[0] != session.get('usuario_id') %}
                                     <a href="{{ url_for('main.delete_user', id=usuario[0]) }}" class="btn btn-sm btn-danger"

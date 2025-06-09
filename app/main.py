@@ -42,6 +42,7 @@ def admin_dashboard():
     """)
     usuarios = cursor.fetchall()
 
+
     # Base del query para notas
     query = """
         SELECT n.id, n.anio, n.estado, p.nombre AS nombre_programa, 
