@@ -1,8 +1,16 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Notas Pendientes
+    {% if estado == 'pendiente' %}
+        Notas Pendientes
+    {% elif estado == 'resuelto' %}
+        Notas Resueltas
+    {% else %}
+        Notas
+    {% endif %}
 {% endblock %}
+
+<p>Estado recibido: "{{ estado }}"</p>
 
 {% block content %}
 <div class="container mt-4">
@@ -21,7 +29,8 @@
         <!-- Cabecera -->
         <div class="card-header bg-dark text-white">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <h5 class="mb-0">Notas Pendientes</h5>
+                <h5 class="mb-0">Notas {{ 'Pendientes' if estado == 'pendiente' else 'Resueltas' }}</h5>
+
                 <a href="{{ url_for('notes.cargar_nota') }}" class="btn btn-success mt-2 mt-md-0">
                     <i class="bi bi-file-earmark-plus"></i> Registrar Nueva Nota
                 </a>
@@ -100,10 +109,11 @@
                     </table>
                 </div>
             {% else %}
-                <div class="alert alert-info">No hay notas pendientes.</div>
+                <div class="alert alert-info">
+                    No hay notas {{ 'pendientes' if estado == 'pendiente' else 'resueltas' }}.
+                </div>
             {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
-
